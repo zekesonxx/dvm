@@ -12,32 +12,14 @@ fn get_version(user: &str, pascal_pkg: &str) -> String {
 }
 
 pub async fn install_version(update: bool, release_type: Type, verbose: bool, user: String) -> Res<(String, String)> {
-  let pkg_name = match release_type {
-    Type::STABLE => "discord",
-    Type::PTB => "discord-ptb",
-    Type::CANARY => "discord-canary",
-    Type::DEVELOPMENT => "discord-development",
-  };
+  let pkg_name = release_type.pkg_name();
 
-  let pascal_pkg = match release_type {
-    Type::STABLE => "Discord",
-    Type::PTB => "DiscordPTB",
-    Type::CANARY => "DiscordCanary",
-    Type::DEVELOPMENT => "DiscordDevelopment",
-  };
+  let pascal_pkg = release_type.directory();
 
-  let dl_sub = match release_type {
-    Type::STABLE => "dl",
-    Type::PTB => "dl-ptb",
-    Type::CANARY => "dl-canary",
-    Type::DEVELOPMENT => "dl-development",
-  };
+  let dl_sub = release_type.dl_sub();
 
   // request api for latest version
-  let res = reqwest::get(format!(
-    "https://discordapp.com/api/v8/updates/{}?platform=linux",
-    release_type
-  ))
+  let res = reqwest::get(release_type.updates_url())
   .await?
   .json::<HashMap<String, String>>()
   .await?;

@@ -7,19 +7,9 @@ pub async fn remove(release_type: Type, verbose: bool) -> Res<()> {
   let user = env::var("USER")?;
   fs::create_dir_all(format!("/home/{}/.dvm/bin", user))?;
 
-  let pascal_pkg = match release_type {
-    Type::STABLE => "Discord",
-    Type::PTB => "DiscordPTB",
-    Type::CANARY => "DiscordCanary",
-    Type::DEVELOPMENT => "DiscordDevelopment",
-  };
+  let pascal_pkg = release_type.directory();
 
-  let pkg_name = match release_type {
-    Type::STABLE => "discord",
-    Type::PTB => "discord-ptb",
-    Type::CANARY => "discord-canary",
-    Type::DEVELOPMENT => "discord-development",
-  };
+  let pkg_name = release_type.pkg_name();
 
   let exists = Path::new(&format!("/home/{}/.dvm/{}", user, pascal_pkg)).exists();
   if verbose {

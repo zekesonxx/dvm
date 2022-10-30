@@ -10,12 +10,7 @@ pub async fn install(release_type: Type, verbose: bool) -> Res<()> {
     info!("created .dvm dir")
   }
 
-  let pascal_pkg = match release_type {
-    Type::STABLE => "Discord",
-    Type::PTB => "DiscordPTB",
-    Type::CANARY => "DiscordCanary",
-    Type::DEVELOPMENT => "DiscordDevelopment",
-  };
+  let pascal_pkg = release_type.directory();
 
   let exists = Path::new(&format!("/home/{}/.dvm/{}", user, pascal_pkg)).exists();
 
