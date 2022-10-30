@@ -23,13 +23,8 @@ use crate::{r#type::Type, Res};
 // }
 
 fn dirent_verbose(dirent: DirEntry) -> Res<(String, Type, PathBuf)> {
-  let rl_type = match dirent.file_name().to_str().unwrap() {
-    "Discord" => Type::STABLE,
-    "DiscordCanary" => Type::CANARY,
-    "DiscordPTB" => Type::PTB,
-    "DiscordDevelopment" => Type::DEVELOPMENT,
-    _ => Type::STABLE,
-  };
+  let rl_type = Type::from_dirname(dirent.file_name().to_str().unwrap()).unwrap_or(Type::STABLE);
+
   let path = dirent.path();
   let version = fs::read_to_string(path.join("version"))?.replace("\n", "");
 

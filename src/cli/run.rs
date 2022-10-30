@@ -18,20 +18,15 @@ pub async fn run(release_type: Option<Type>, args: Vec<String>, verbose: bool) -
 
   let release_type = release_type.unwrap_or(Type::STABLE);
 
-  let pascal_pkg = match release_type {
-    Type::STABLE => "Discord",
-    Type::PTB => "DiscordPTB",
-    Type::CANARY => "DiscordCanary",
-    Type::DEVELOPMENT => "DiscordDevelopment",
-  };
+  let install_dir = release_type.directory();
 
-  let exists = Path::new(&format!("/home/{}/.dvm/{}", user, pascal_pkg)).exists();
+  let exists = Path::new(&format!("/home/{}/.dvm/{}", user, install_dir)).exists();
 
   if !exists {
     error!("{} is not installed", release_type);
   }
 
-  Command::new(format!("/home/{}/.dvm/{}/{}", user, pascal_pkg, pascal_pkg))
+  Command::new(format!("/home/{}/.dvm/{}/{}", user, install_dir, install_dir))
     .args(&args)
     .spawn()?
     .wait_with_output().await?;
