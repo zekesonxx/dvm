@@ -4,7 +4,7 @@ use tokio::process::Command;
 
 use crate::{Res, error, info, r#type::Type};
 
-pub async fn run(release_type: Type, args: Vec<String>, verbose: bool) -> Res<()> {
+pub async fn run(release_type: Option<Type>, args: Vec<String>, verbose: bool) -> Res<()> {
   // create user var & create .dvm dirs
   let user = env::var("USER")?;
   fs::create_dir_all(format!("/home/{}/.dvm/bin", user))?;
@@ -15,6 +15,8 @@ pub async fn run(release_type: Type, args: Vec<String>, verbose: bool) -> Res<()
   if verbose {
     info!("created .dvm dir")
   }
+
+  let release_type = release_type.unwrap_or(Type::STABLE);
 
   let pascal_pkg = match release_type {
     Type::STABLE => "Discord",

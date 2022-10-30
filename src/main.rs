@@ -95,7 +95,7 @@ struct RunOptions {
   verbose: bool,
 
   #[clap(possible_values = POSSIBLE_VALUES)]
-  r#type: String,
+  r#type: Option<String>,
 
   #[clap(last = true)]
   args: Vec<String>
@@ -162,7 +162,7 @@ async fn main() -> Res<()> {
       completions::give_completions(&opt.shell)
     }
     Command::Run(opt) => {
-      run(str_to_type(opt.r#type), opt.args.clone(), opt.verbose).await?
+      run(opt.r#type.map(str_to_type), opt.args.clone(), opt.verbose).await?
     }
   })
 }
