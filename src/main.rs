@@ -2,7 +2,7 @@
 compile_error!("can only be compiled on linux ;)");
 
 use clap::{AppSettings, Clap};
-use dvm::{Res, cli::{install, install_openasar, remove, show, update, run}, common::*, common::VERSION, completions, error, r#type::Type};
+use dvm::{Res, cli::{install, install_openasar, remove, show, update, update_all, run}, common::*, common::VERSION, completions, error, r#type::Type};
 
 #[derive(Clap, Debug)]
 #[clap(version = VERSION, setting = AppSettings::ColoredHelp)]
@@ -142,10 +142,12 @@ async fn main() -> Res<()> {
     }
 
     Command::Update(opt) => {
-      check_type_len(&opt.r#type)?;
-
-      for r#type in opt.r#type {
-        update(str_to_type(r#type), opt.verbose).await?
+      if opt.r#type.is_empty() {
+        update_all(opt.verbose).await?
+      } else {
+        for r#type in opt.r#type {
+          update(str_to_type(r#type), opt.verbose).await?
+        }
       }
     }
     Command::Remove(opt) => {
