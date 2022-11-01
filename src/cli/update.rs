@@ -1,15 +1,17 @@
-use std::{env, fs, path::Path};
+use std::{env, path::Path};
+
+use tokio::fs;
 
 use crate::{Res, error, info, r#type::Type, success, util::install_version};
 
 pub async fn update(release_type: Type, verbose: bool) -> Res<()> {
   // create user var & create .dvm dirs
   let user = env::var("USER")?;
-  fs::create_dir_all(format!("/home/{}/.dvm/bin", user))?;
+  fs::create_dir_all(format!("/home/{}/.dvm/bin", user)).await?;
 
   // create user var & create .dvm dirs
   let user = env::var("USER")?;
-  fs::create_dir_all(format!("/home/{}/.dvm/bin", user))?;
+  fs::create_dir_all(format!("/home/{}/.dvm/bin", user)).await?;
   if verbose {
     info!("created .dvm dir")
   }
