@@ -3,7 +3,7 @@ use std::{collections::HashMap};
 use tokio::process::Command;
 use tokio::fs;
 
-use crate::{Res, error, info, r#type::Type};
+use crate::{Res, error, info, warn, r#type::Type};
 
 async fn get_version(user: &str, pascal_pkg: &str) -> String {
   fs::read_to_string(format!("/home/{}/.dvm/{}/version", user, pascal_pkg)).await
@@ -44,10 +44,11 @@ pub async fn install_version(update: bool, release_type: Type, verbose: bool, us
     }
 
     if version.eq(latest) {
-      error!(
+      warn!(
         "you already have the latest version of {}",
         release_type
       );
+      return Ok((latest.to_string(), version));
     }
 
     // remove installed to make room for upgrade

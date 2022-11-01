@@ -28,6 +28,14 @@ macro_rules! success {
 }
 
 #[macro_export]
+macro_rules! warn {
+  ($($arg:tt)*) => ({
+    use colored::Colorize;
+    println!("{}{}", "warning: ".yellow().bold(), std::format_args!($($arg)*));
+  })
+}
+
+#[macro_export]
 macro_rules! error {
   ($($arg:tt)*) => ({
     use colored::Colorize;
