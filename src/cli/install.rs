@@ -1,11 +1,13 @@
-use std::{ env, fs, path::Path};
+use std::{ env, path::Path};
+
+use tokio::fs;
 
 use crate::{error, info, r#type::Type, success, Res, util::install_version};
 
 pub async fn install(release_type: Type, verbose: bool, open_asar: bool) -> Res<()> {
   // create user var & create .dvm dirs
   let user = env::var("USER")?;
-  fs::create_dir_all(format!("/home/{}/.dvm/bin", user))?;
+  fs::create_dir_all(format!("/home/{}/.dvm/bin", user)).await?;
   if verbose {
     info!("created .dvm dir")
   }
@@ -23,7 +25,7 @@ pub async fn install(release_type: Type, verbose: bool, open_asar: bool) -> Res<
   if open_asar {
     let asar_file = format!("/home/{}/.dvm/{}/resources/app.asar", user, pascal_pkg);
 
-    fs::rename(&asar_file, format!("{}.bak", &asar_file))?;
+    fs::rename(&asar_file, format!("{}.bak", &asar_file)).await?;
     info!("renamed app.asar to app.asar.bak (if discord doesn't work after this, rename it back)");
 
     let res = reqwest::get("https://github.com/GooseMod/OpenAsar/releases/download/nightly/app.asar")
@@ -31,7 +33,7 @@ pub async fn install(release_type: Type, verbose: bool, open_asar: bool) -> Res<
       .bytes()
       .await?;
 
-    fs::write(&asar_file, res)?;
+    fs::write(&asar_file, res).await?;
 
     info!("downloaded openasar, if discord is open, restart it");
   }

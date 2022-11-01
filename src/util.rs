@@ -1,11 +1,12 @@
-use std::{collections::HashMap, fs};
+use std::{collections::HashMap};
 
 use tokio::process::Command;
+use tokio::fs;
 
 use crate::{Res, error, info, r#type::Type};
 
-fn get_version(user: &str, pascal_pkg: &str) -> String {
-  fs::read_to_string(format!("/home/{}/.dvm/{}/version", user, pascal_pkg))
+async fn get_version(user: &str, pascal_pkg: &str) -> String {
+  fs::read_to_string(format!("/home/{}/.dvm/{}/version", user, pascal_pkg)).await
     .expect("could not read version file: malformed installation detected")
     .replace("\n", "")
 
@@ -36,7 +37,7 @@ pub async fn install_version(update: bool, release_type: Type, verbose: bool, us
 
   let mut version = String::new();
   if update {
-    version = get_version(&user, pascal_pkg);
+    version = get_version(&user, pascal_pkg).await;
     // check if the version is the same & clean file of \n's
     if verbose {
       info!("checking if existing version and latest match")
@@ -50,7 +51,7 @@ pub async fn install_version(update: bool, release_type: Type, verbose: bool, us
     }
 
     // remove installed to make room for upgrade
-    fs::remove_dir_all(format!("/home/{}/.dvm/{}", user, pascal_pkg))?;
+    fs::remove_dir_all(format!("/home/{}/.dvm/{}", user, pascal_pkg)).await?;
     info!("removing old components");
   }
 
@@ -71,7 +72,7 @@ pub async fn install_version(update: bool, release_type: Type, verbose: bool, us
 
   // write tar to /tmp
   let tmp_file = format!("/tmp/{}.tar.gz", tar_name);
-  fs::write(&tmp_file, tar_bytes)?;
+  fs::write(&tmp_file, tar_bytes).await?;
   if verbose {
     info!("wrote tar to /tmp")
   }
@@ -124,7 +125,7 @@ exec /home/{}/.dvm/{}/{} "$@" $USER_FLAGS
 "#,
       pkg_name, user, pascal_pkg, pascal_pkg
     ),
-  )?;
+  ).await?;
 
   if verbose {
     info!("created executable bin")
@@ -155,7 +156,7 @@ exec /home/{}/.dvm/{}/{} "$@" $USER_FLAGS
   info!("installing desktop file");
 
   // copy icon to .local/share/icons
-  fs::create_dir_all(format!("/home/{}/.local/share/icons", user))?;
+  fs::create_dir_all(format!("/home/{}/.local/share/icons", user)).await?;
   Command::new("cp")
     .arg(format!("/home/{}/.dvm/{}/discord.png", user, pascal_pkg))
     .arg(format!(
@@ -171,13 +172,13 @@ exec /home/{}/.dvm/{}/{} "$@" $USER_FLAGS
   fs::write(
     format!("/home/{}/.dvm/{}/version", user, pascal_pkg),
     latest,
-  )?;
+  ).await?;
   if verbose {
     info!("created version file")
   }
 
   // remove tmp tar ball
-  fs::remove_file(tmp_file)?;
+  fs::remove_file(tmp_file).await?;
   if verbose {
     info!("remove tmp tar ball")
   }
